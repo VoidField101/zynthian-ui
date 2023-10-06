@@ -28,8 +28,8 @@ using namespace std;
 
 // **** Global variables ****
 vector<AUDIO_PLAYER*> g_vPlayers;
-jack_client_t* g_jack_client;
-jack_port_t* g_jack_midi_in;
+jack_client_t* g_jack_client = NULL;
+jack_port_t* g_jack_midi_in = NULL;
 jack_nframes_t g_samplerate = 44100; // Playback samplerate set by jackd
 uint8_t g_debug = 0;
 uint8_t g_last_debug = 0;
@@ -1138,13 +1138,15 @@ AUDIO_PLAYER* add_player() {
     sprintf(port_name, "out_%02da", pPlayer->index);
     if (!(pPlayer->jack_out_a = jack_port_register(g_jack_client, port_name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0))) {
         fprintf(stderr, "libaudioplayer error: cannot register audio output port %s\n", port_name);
-        return 0;
+        remove_player(pPlayer);
+        return nullptr;
     }
     sprintf(port_name, "out_%02db", pPlayer->index);
     if (!(pPlayer->jack_out_b = jack_port_register(g_jack_client, port_name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0))) {
         fprintf(stderr, "libaudioplayer error: cannot register audio output port %s\n", port_name);
         jack_port_unregister(g_jack_client, pPlayer->jack_out_a);
-        return 0;
+        remove_player(pPlayer);
+        return nullptr;
     }
 
     //fprintf(stderr, "libzynaudioplayer: Created new audio player\n");
@@ -1154,6 +1156,8 @@ AUDIO_PLAYER* add_player() {
 void remove_player(AUDIO_PLAYER * pPlayer) {
     if(!pPlayer)
         return;
+    fprintf(stderr, "libaudioplayer error deleted");
+    getMutex();
     unload(pPlayer);
     if (jack_port_unregister(g_jack_client, pPlayer->jack_out_a)) {
         fprintf(stderr, "libaudioplayer error: cannot unregister audio output port %02dA\n", pPlayer + 1);
@@ -1168,6 +1172,7 @@ void remove_player(AUDIO_PLAYER * pPlayer) {
         delete pPlayer;
         break;
     }
+    releaseMutex();
 }
 
 void set_midi_chan(AUDIO_PLAYER * pPlayer, uint8_t midi_chan) {
@@ -1187,6 +1192,8 @@ int get_index(AUDIO_PLAYER * pPlayer) {
 
 
 const char* get_jack_client_name() {
+    if(!g_jack_client)
+        return "";
     return jack_get_client_name(g_jack_client);
 }
 

@@ -65,6 +65,7 @@ class zynaudioplayer():
 			self.libaudioplayer.get_codec.restype = ctypes.c_char_p
 			self.libaudioplayer.get_jack_client_name.restype = ctypes.c_char_p
 			self.libaudioplayer.get_gain.restype = ctypes.c_float
+			self.libaudioplayer.get_index.restype = ctypes.c_int
 			self.libaudioplayer.add_player.restype = ctypes.c_void_p
 			self.libaudioplayer.set_gain.argtypes = [ctypes.c_void_p, ctypes.c_float]
 			self.libaudioplayer.set_position.argtypes = [ctypes.c_void_p, ctypes.c_float]
@@ -78,6 +79,10 @@ class zynaudioplayer():
 			self.libaudioplayer.set_env_sustain.argtypes = [ctypes.c_void_p, ctypes.c_float]
 			self.libaudioplayer.set_env_release.argtypes = [ctypes.c_void_p, ctypes.c_float]
 			self.libaudioplayer.set_env_release.argtypes = [ctypes.c_void_p, ctypes.c_float]
+			self.libaudioplayer.remove_player.argtypes = [ctypes.c_void_p]
+			self.libaudioplayer.set_midi_chan.argtypes = [ctypes.c_void_p, ctypes.c_uint8]
+			self.libaudioplayer.get_index.argtypes = [ctypes.c_void_p]
+			self.libaudioplayer.get_playback_state = [ctypes.c_void_p]
 			self.control_cb = None
 		except Exception as e:
 			self.libaudioplayer=None
